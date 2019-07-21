@@ -1,11 +1,10 @@
 package com.example.demo;
 
-import javax.swing.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class Enchant {
+public class Enchant extends ParsedItem {
 
-    private final Map<String, Object> additions = new HashMap<>();
     private String name;
     private String nameId;
     private List<String> artifactTypes;
@@ -16,17 +15,6 @@ public class Enchant {
         Objects.requireNonNull(nameId);
         Objects.requireNonNull(artifactTypes);
         Objects.requireNonNull(enchantQuality);
-    }
-
-    public Map<String, Object> getAdditions() {
-        return additions;
-    }
-
-    public void addAddition(String name, Object value) {
-        if (this.additions.containsKey(name)) {
-            addAddition("_" + name, value);
-        }
-        this.additions.put(name, value);
     }
 
     public String getName() {
@@ -50,7 +38,7 @@ public class Enchant {
     }
 
     public void setArtifactTypes(String... artifactTypes) {
-        this.artifactTypes = List.of(artifactTypes);
+        this.artifactTypes = Arrays.stream(artifactTypes).filter(s -> !s.isBlank()).collect(Collectors.toList());
     }
 
     public EnchantQuality getEnchantQuality() {
