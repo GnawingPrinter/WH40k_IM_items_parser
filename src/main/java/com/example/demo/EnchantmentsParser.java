@@ -6,6 +6,7 @@ import java.io.LineNumberReader;
 import java.sql.Blob;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class EnchantmentsParser extends BlobParser {
@@ -55,9 +56,9 @@ public class EnchantmentsParser extends BlobParser {
             check.addAll(itemGroups.get("all_item"));
             check.add("iinferno_pistol");
             if (!check.equals(items)) {
-                throw new IllegalStateException("all_item and all collected items differ!\n"
-                        + items.stream().sorted().collect(Collectors.joining(","))
-                        + "\n" + check.stream().sorted().collect(Collectors.joining(",")));
+                throw new IllegalStateException("all_item and all collected items differ!\n" +
+                                                items.stream().sorted().collect(Collectors.joining(",")) + "\n" +
+                                                check.stream().sorted().collect(Collectors.joining(",")));
             }
         } else {
             throw new IllegalStateException("expected { after \"Templates\", found: " + line);
@@ -82,7 +83,8 @@ public class EnchantmentsParser extends BlobParser {
             key = line;
             line = readLine(bufferedReader);
             if (!line.startsWith("{")) {
-                throw new IllegalArgumentException("malformed file - expected { after enchantment line without '=' with key: " + key);
+                throw new IllegalArgumentException(
+                        "malformed file - expected { after enchantment line without '=' with key: " + key);
             }
             for (line = readLine(bufferedReader); !line.startsWith("}"); line = readLine(bufferedReader)) {
                 value += line + "\t";
@@ -110,11 +112,23 @@ public class EnchantmentsParser extends BlobParser {
         return itemGroups;
     }
 
+    public Stream<Map.Entry<String, List<String>>> streamItemGroups() {
+        return itemGroups.entrySet().stream();
+    }
+
     public Set<String> getItems() {
         return items;
     }
 
+    public Stream<String> streamItems() {
+        return items.stream();
+    }
+
     public Map<String, Enchant> getEnchantMap() {
         return enchantMap;
+    }
+
+    public Stream<Enchant> streamEnchants() {
+        return enchantMap.values().stream();
     }
 }

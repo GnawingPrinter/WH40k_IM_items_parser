@@ -3,6 +3,7 @@ package com.example.demo;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ItemParser extends BlobParser {
 
@@ -25,7 +26,8 @@ public class ItemParser extends BlobParser {
     }
 
     private void maybeAddItem(ParsedItem blob, String line) {
-        if (line.startsWith("__") || blob.getAdditions().get(RARITY) == null || blob.getAdditions().get(TYPE) == null) {
+        if (line.startsWith("__") || blob.getAdditions().get(RARITY) == null || blob.getAdditions().get(TYPE) == null ||
+            blob.getAdditions().get("Debug") != null) {
             return;
         }
         String type = (String) blob.getAdditions().get("Type");
@@ -49,4 +51,9 @@ public class ItemParser extends BlobParser {
     public Map<String, Item> getAllItems() {
         return allItems;
     }
+
+    public Stream<Item> streamItems() {
+        return allItems.values().stream();
+    }
+
 }

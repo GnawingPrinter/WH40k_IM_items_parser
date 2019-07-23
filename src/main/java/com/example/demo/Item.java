@@ -1,7 +1,12 @@
 package com.example.demo;
 
 
-public class Item extends ParsedItem {
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+public class Item extends ParsedItem implements Comparable<Item> {
     private String type;
     private String nameID;
     private Rarity rarity;
@@ -35,6 +40,25 @@ public class Item extends ParsedItem {
         } else {
             this.rarity = Rarity.valueOf(rarity);
         }
+    }
+
+    public List<String> getMainEnchants() {
+        switch (getRarity()) {
+            case godlike:
+                return List.of(((String) getAdditions().get("GodlikeEnchants")).split(","));
+            case ancient:
+                return List.of(((String) getAdditions().get("FixEnchants")).split(";", 2)[0]);
+            case biggodlike:
+            case morality:
+                return List.of((String) getAdditions().get("MainEnchant"));
+            default:
+                return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public int compareTo(Item o) {
+        return o.getNameID().compareTo(this.getNameID());
     }
 
     public static enum Rarity {

@@ -3,7 +3,7 @@ package com.example.demo;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Enchant extends ParsedItem {
+public class Enchant extends ParsedItem implements Comparable<Enchant> {
 
     private String name;
     private String nameId;
@@ -49,6 +49,20 @@ public class Enchant extends ParsedItem {
         this.enchantQuality = EnchantQuality.valueOf(enchantQuality);
     }
 
+    public String getValueOrEmpty() {
+        if (this.getAdditions().containsKey("_Values")) {
+            return (String) this.getAdditions().get("_Values");
+        } else if (this.getAdditions().containsKey("Values")) {
+            return (String) this.getAdditions().get("Values");
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    public int compareTo(Enchant o) {
+        return this.getName().toLowerCase().compareTo(o.getName().toLowerCase());
+    }
 
     public static enum EnchantQuality {
         primary, secondary, godlike, morality, gem;
