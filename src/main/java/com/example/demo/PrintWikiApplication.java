@@ -2,58 +2,32 @@ package com.example.demo;
 
 
 import com.example.demo.domain.*;
+import org.w3c.dom.ls.LSOutput;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DemoApplication {
+public class PrintWikiApplication {
     public static final String ENCHANTMENTS_CFG = "enchantments.cfg";
     public static final String INVENTORYITEMS_CFG = "inventoryitems.cfg";
     private final EnchantmentsParser enchantmentsParser = new EnchantmentsParser(ENCHANTMENTS_CFG);
     private ItemParser itemParser;
 
-    public DemoApplication() throws IOException {
+    public PrintWikiApplication() throws IOException {
         this.enchantmentsParser.parse();
         this.itemParser = new ItemParser(INVENTORYITEMS_CFG, this.enchantmentsParser.getItems());
         this.itemParser.parse();
 
-        this.printAssumptionsAboutEnchants();
-//        this.enchantmentsParser.streamEnchants()
-//                .filter(e -> !e.getArtifactTypes().isEmpty() && !e.getArtifactTypes().contains("all_item"))
-//                .filter(e -> e.getAdditions().get("PriorityGroup") != null &&
-//                             ((String) e.getAdditions().get("PriorityGroup")).startsWith("base"))
-//                .map(e -> e.getName() + " " + e.getArtifactTypes()).forEach(System.out::println);
-
-//        base.stream().sorted()
-//                .map(e -> e.getName() + " " + e.getEnchantQuality() + " " + e.getAdditions().get("PriorityGroup"))
-//                .forEach(System.out::println);
-//        System.out.println();
-//        bonus.stream().sorted()
-//                .map(e -> e.getName() + " " + e.getEnchantQuality() + " " + e.getAdditions().get("PriorityGroup"))
-//                .forEach(System.out::println);
-//        });
-
-
 //        printAllPrimSecValueWikiPage();
 //        printAllItemWikiPage();
-//        findMainEnchantsFor(itemParser.streamItems(), "force_staff", Item.Rarity.ancient).map(item -> item.getNameID()).forEach(System.out::println);
-
+        printAllEnchantsWithItems();
 //        enchantmentsParser.getItems().forEach(System.out::println);
-//        printAssumptionsAboutEnchants(enchantmentsParser.getEnchantMap());
-//
-//        findPrimSecAllFor(enchantmentsMap, "weapon_1h_overheat");
-//        System.out.println();
-//        findPrimSecAllFor(enchantmentsMap, "inferno_pistol");
-//        System.out.println();
-//        findPrimSecAllFor(enchantmentsMap, "iinferno_pistol");
-//        System.out.println();
-//        findPrimSecAllFor(enchantmentsMap, "weapon_1h_heat");
     }
 
     public static void main(String[] args) throws IOException {
-        new DemoApplication();
+        new PrintWikiApplication();
     }
 
 //    private Stream<Enchant> allEnchantsHavingArtifactTypeOrGroupOfType(String type) {
@@ -119,6 +93,53 @@ public class DemoApplication {
             printAdditionalItems(item);
 
         });
+    }
+
+    private void printAllEnchantsWithItems() {
+        System.out.println("\n# Relic enchants:\n");
+        this.enchantmentsParser.streamEnchants().sorted().filter(i -> i.getEnchantQuality() == Enchant.EnchantQuality.godlike)
+                .forEachOrdered(e -> {
+                    System.out.println(itemParser.streamItems().filter(i -> i.getMainEnchants().contains(e.getName()))
+                            .map(i -> i.getNameID() + " (" + i.getRarity() + ")").distinct().sorted().collect(Collectors
+                                    .joining("\n", "\n## " + e.getName() + ":\n```\n", "\n```\n")));
+                });
+        System.out.println("\n# Morality enchants:\n");
+        this.enchantmentsParser.streamEnchants().sorted().filter(i -> i.getEnchantQuality() == Enchant.EnchantQuality.morality)
+                .forEachOrdered(e -> {
+                    System.out.println(itemParser.streamItems().filter(i -> i.getMainEnchants().contains(e.getName()))
+                            .map(Item::getNameID).distinct().sorted().collect(Collectors
+                                    .joining("\n", "\n## " + e.getName() + ":\n```\n", "\n```\n")));
+                });
+        System.out.println("\n# Primary enchants:\n");
+        this.enchantmentsParser.streamEnchants().sorted().filter(i -> i.getEnchantQuality() == Enchant.EnchantQuality.primary)
+                .forEachOrdered(e -> {
+                    System.out.println("## "+e.getName() + ":\n```\n" + e.getArtifactTypes().stream().sorted().collect(
+                            Collectors.joining("\n")) + "\n```\n");
+                });
+        System.out.println("\n# Secondary enchants:\n");
+        this.enchantmentsParser.streamEnchants().sorted().filter(i -> i.getEnchantQuality() == Enchant.EnchantQuality.secondary)
+                .forEachOrdered(e -> {
+                    System.out.println("## "+e.getName() + ":\n```\n" + e.getArtifactTypes().stream().sorted().collect(
+                            Collectors.joining("\n")) + "\n```\n");
+                });
+//        Set<Enchant> enchantsPrimary = new HashSet<>();
+//        Set<Enchant> enchantsSecondary = new HashSet<>();
+//        Set<String> enchantsMain = new HashSet<>();
+//
+//        this.enchantmentsParser.streamEnchants().filter(e -> e.getEnchantQuality() == Enchant.EnchantQuality.godlike);
+//
+//        this.enchantmentsParser.streamItemGroups()
+//                .filter(stringListEntry -> stringListEntry.getValue().contains(item)).map(Map.Entry::getKey)
+//                .forEach(group -> {
+//                    findEnchantsByArtifactTypeContainedAndQualityEqual(group, Enchant.EnchantQuality.primary)
+//                            .forEach(enchantsPrimary::add);
+//                    findEnchantsByArtifactTypeContainedAndQualityEqual(group, Enchant.EnchantQuality.secondary)
+//                            .forEach(enchantsSecondary::add);
+//                });
+//        this.itemParser.streamItems().filter(i -> i.getType().equals(item) && i.getRarity() == Item.Rarity.godlike)
+//                .map(i -> (String) i.getAdditions().get("GodlikeEnchants"))
+//                .flatMap(list -> Arrays.stream(list.split(","))).forEach(enchantsMain::add);
+
     }
 
     private void printAdditionalItems(String item) {
